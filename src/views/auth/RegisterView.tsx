@@ -14,6 +14,8 @@ export default function RegisterView() {
         password_confirmation: '',
     }
 
+    const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<UserRegistrationForm>({ defaultValues: initialValues })
+
     const { mutate } = useMutation({
         mutationFn: createAccount,
         onError: (error) => {
@@ -21,10 +23,9 @@ export default function RegisterView() {
         },
         onSuccess: (data) => {
             toast.success(data)
+            reset()
         }
     })
-
-    const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<UserRegistrationForm>({ defaultValues: initialValues });
 
     const password = watch('password');
 
@@ -139,7 +140,12 @@ export default function RegisterView() {
                 <Link 
                     className="text-center text-gray-300 font-normal"
                     to={'/auth/login'}
-                >Ya tienes cuenta? Inicia sesión</Link>
+                >Already have an account? Login</Link>
+
+                <Link 
+                    className="text-center text-gray-300 font-normal"
+                    to={'/auth/forgot-password'}
+                >Forgot your password?</Link>
             </nav>
         </>
     )
