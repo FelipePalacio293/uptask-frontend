@@ -1,6 +1,6 @@
 import api from "@/lib/axios"
 import { isAxiosError } from "axios"
-import { ConfirmToken, RequestConfirmationCodeForm, UserLoginForm, UserRegistrationForm } from "../types"
+import { ConfirmToken, NewPasswordForm, RequestConfirmationCodeForm, UserLoginForm, UserRegistrationForm, userSchema } from "../types"
 
 export async function createAccount(formData: UserRegistrationForm) {
     try {
@@ -42,7 +42,7 @@ export async function authenticateUser(formData: UserLoginForm) {
     try {
         const url = `/auth/login`
         const { data } = await api.post(url, formData)
-        console.log(data)
+        localStorage.setItem('AUTH_TOKEN', data)
         return data
     } catch (error) {
         if (isAxiosError(error) && error.response) {
@@ -57,6 +57,44 @@ export async function forgotPassword(formData: RequestConfirmationCodeForm) {
         const { data } = await api.post<string>(url, formData)
         return data
     } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error)
+        }
+    }
+}
+
+export async function validateToken(formData: ConfirmToken) {
+    try {
+        const url = `/auth/validate-token`
+        const { data } = await api.post<string>(url, formData)
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error)
+        }
+    }
+}
+
+
+export async function restorePasswordWithToken({formData, token}: {formData: NewPasswordForm, token: ConfirmToken['token']}) {
+    try {
+        const url = `/auth/restore-password/${token}`
+        const { data } = await api.post<string>(url, formData)
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error)
+        }
+    }
+}
+
+export async function getUser() {
+    try {
+        const url = `/auth/user`
+        const { data } = await api.get(url)
+        const response = userSchema.safeParse(data)
+        if (response.success) return data
+    } catch(error) {
         if (isAxiosError(error) && error.response) {
             throw new Error(error.response.data.error)
         }
